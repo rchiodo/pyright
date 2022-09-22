@@ -51,7 +51,26 @@
                 "command": "pyright.restartserver",
                 "title": "Restart Server",
                 "category": "Pyright"
+            },
+            {
+                "command": "pyright.dumpTokens",
+                "title": "Dump token streams ...",
+                "category": "Pyright",
+                "enablement": "editorLangId == python && pyright.development"
+            },
+            {
+                "command": "pyright.dumpNodes",
+                "title": "Dump parse tree ...",
+                "category": "Pyright",
+                "enablement": "editorLangId == python && pyright.development"
+            },
+            {
+                "command": "pyright.dumpTypes",
+                "title": "Dump type info ...",
+                "category": "Pyright",
+                "enablement": "editorLangId == python && pyright.development"
             }
+
         ],
         "menus": {
             "editor/context": [
@@ -61,7 +80,22 @@
                     "group": "Pyright",
                     "when": "editorLangId == python"
                 }
+            ],
+            "commandPalette": [
+                {
+                    "command": "pyright.dumpTokens",
+                    "when": "editorLangId == python && pyright.development"
+                },
+                {
+                    "command": "pyright.dumpNodes",
+                    "when": "editorLangId == python && pyright.development"
+                },
+                {
+                    "command": "pyright.dumpTypes",
+                    "when": "editorLangId == python && pyright.development"
+                }
             ]
+
         },
         "configuration": {
             "type": "object",
