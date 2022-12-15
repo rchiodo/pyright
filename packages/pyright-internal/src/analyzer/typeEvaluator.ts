@@ -24669,7 +24669,7 @@ class TypeEvaulatorImpl implements TypeEvaluator {
         return TypePrinter.printObjectTypeForClass(
             type,
             this._evaluatorOptions.printTypeFlags,
-            this.getFunctionEffectiveReturnType
+            this.getFunctionEffectiveReturnType.bind(this)
         );
     }
 
@@ -24677,7 +24677,7 @@ class TypeEvaulatorImpl implements TypeEvaluator {
         return TypePrinter.printFunctionParts(
             type,
             this._evaluatorOptions.printTypeFlags,
-            this.getFunctionEffectiveReturnType
+            this.getFunctionEffectiveReturnType.bind(this)
         );
     }
 
@@ -24694,7 +24694,7 @@ class TypeEvaulatorImpl implements TypeEvaluator {
             flags |= TypePrinter.PrintTypeFlags.UseTypingUnpack;
         }
 
-        return TypePrinter.printType(type, flags, this.getFunctionEffectiveReturnType);
+        return TypePrinter.printType(type, flags, this.getFunctionEffectiveReturnType.bind(this));
     }
 
     // Calls back into the parser to parse the contents of a string literal.

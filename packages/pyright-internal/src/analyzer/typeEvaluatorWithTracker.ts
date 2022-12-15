@@ -58,13 +58,24 @@ export function createTypeEvaluatorWithTracker(
     // Wrap all functions with either a logger or a timer.
     importLookup = wrapWithLogger(importLookup);
     const evaluator = createTypeEvaluator(importLookup, evaluatorOptions);
-    const keys = Object.keys(evaluator);
-    keys.forEach((k) => {
-        const entry = (evaluator as any)[k];
-        if (typeof entry === 'function') {
-            (evaluator as any)[k] = wrapWithLogger(entry);
-        }
-    });
+    const prototype = Object.getPrototypeOf(evaluator);
+    if (prototype) {
+        const names = Object.getOwnPropertyNames(prototype);
+        names.forEach((n) => {
+            const entry = prototype[n];
+            if (typeof entry === 'function') {
+                prototype[n] = wrapWithLogger(entry.bind(evaluator));
+            }
+        });
+    } else {
+        const keys = Object.keys(evaluator);
+        keys.forEach((k) => {
+            const entry = (evaluator as any)[k];
+            if (typeof entry === 'function') {
+                (evaluator as any)[k] = wrapWithLogger(entry);
+            }
+        });
+    }
 
     return evaluator;
 }
