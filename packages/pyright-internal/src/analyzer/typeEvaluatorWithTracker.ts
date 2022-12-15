@@ -64,7 +64,7 @@ export function createTypeEvaluatorWithTracker(
         names.forEach((n) => {
             const entry = prototype[n];
             if (typeof entry === 'function') {
-                prototype[n] = wrapWithLogger(entry.bind(evaluator));
+                (evaluator as any)[n] = wrapWithLogger(entry.bind(evaluator));
             }
         });
     } else {
