@@ -17,7 +17,9 @@
         "test:norebuild": "jest --forceExit",
         "test:coverage": "jest --forceExit --reporters=jest-junit --reporters=default --coverage --coverageReporters=cobertura --coverageReporters=html --coverageReporters=json",
         "test:imports": "jest importResolver.test --forceExit --runInBand",
-        "generateParsers": "peggy --format commonjs --output ./src/docstring/reStructuredText.js ./src/docstring/reStructuredText.peggy"
+        "generateParserRest": "peggy --format commonjs --output ./src/docstring/reStructuredText.js ./src/docstring/reStructuredText.peggy",
+        "generateParserGoog": "peggy --format commonjs --output ./src/docstring/googledoc.js ./src/docstring/googledoc.peggy", 
+        "generateParsers": "npm run generateParserRest && npm run generateParserGoog"
     },
     "dependencies": {
         "@iarna/toml": "2.2.5",
