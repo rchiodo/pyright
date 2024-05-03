@@ -17,7 +17,6 @@ import {
     VariableDeclaration,
     isUnresolvedAliasDeclaration,
 } from '../analyzer/declaration';
-import { convertDocStringToMarkdown, convertDocStringToPlainText } from '../analyzer/docStringConversion';
 import * as ParseTreeUtils from '../analyzer/parseTreeUtils';
 import { SourceMapper } from '../analyzer/sourceMapper';
 import { PrintTypeOptions, TypeEvaluator } from '../analyzer/typeEvaluatorTypes';
@@ -41,6 +40,8 @@ import { ProgramView } from '../common/extensibility';
 import { convertOffsetToPosition, convertPositionToOffset } from '../common/positionUtils';
 import { Position, Range, TextRange } from '../common/textRange';
 import { Uri } from '../common/uri/uri';
+import { convertDocStringToMarkdown } from '../docstring/markdownConverter';
+import { convertDocStringToPlainText } from '../docstring/plaintextConverter';
 import { ExpressionNode, NameNode, ParseNode, ParseNodeType, StringNode } from '../parser/parseNodes';
 import { ParseFileResults } from '../parser/parser';
 import {

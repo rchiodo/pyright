@@ -20,8 +20,6 @@ import {
     SignatureInformation,
 } from 'vscode-languageserver';
 
-import { convertDocStringToMarkdown, convertDocStringToPlainText } from '../analyzer/docStringConversion';
-import { extractParameterDocumentation } from '../analyzer/docStringUtils';
 import * as ParseTreeUtils from '../analyzer/parseTreeUtils';
 import { getCallNodeAndActiveParameterIndex } from '../analyzer/parseTreeUtils';
 import { SourceMapper } from '../analyzer/sourceMapper';
@@ -32,6 +30,8 @@ import { ProgramView } from '../common/extensibility';
 import { convertPositionToOffset } from '../common/positionUtils';
 import { Position } from '../common/textRange';
 import { Uri } from '../common/uri/uri';
+import { convertDocStringToMarkdown, extractParameterDocString } from '../docstring/markdownConverter';
+import { convertDocStringToPlainText } from '../docstring/plaintextConverter';
 import { CallNode, NameNode, ParseNodeType } from '../parser/parseNodes';
 import { ParseFileResults } from '../parser/parser';
 import { getDocumentationPartsForTypeAndDecl, getFunctionDocStringFromType } from './tooltipUtils';
@@ -241,7 +241,7 @@ export class SignatureHelpProvider {
                 startOffset: label.length,
                 endOffset: label.length + paramString.length,
                 text: paramString,
-                documentation: extractParameterDocumentation(functionDocString || '', paramName),
+                documentation: extractParameterDocString(functionDocString || '', paramName),
             });
 
             // Name match for active parameter. The set of parameters from the function

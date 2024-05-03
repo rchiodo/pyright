@@ -7,7 +7,8 @@
  */
 
 import assert = require('assert');
-import { convertDocStringToMarkdown, convertDocStringToPlainText } from '../analyzer/docStringConversion';
+import { convertDocStringToMarkdown } from '../docstring/markdownConverter';
+import { convertDocStringToPlainText } from '../docstring/plaintextConverter';
 
 // For substitution in the test data strings
 // Produces more readable test data than escaping the back ticks

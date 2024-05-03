@@ -9,7 +9,6 @@
 import { InsertTextFormat, MarkupContent, MarkupKind, TextEdit } from 'vscode-languageserver-types';
 
 import { Declaration, DeclarationType } from '../analyzer/declaration';
-import { convertDocStringToMarkdown, convertDocStringToPlainText } from '../analyzer/docStringConversion';
 import { TypeEvaluator } from '../analyzer/typeEvaluatorTypes';
 import { isProperty } from '../analyzer/typeUtils';
 import {
@@ -27,6 +26,8 @@ import {
 import { SignatureDisplayType } from '../common/configOptions';
 import { TextEditAction } from '../common/editAction';
 import { Uri } from '../common/uri/uri';
+import { convertDocStringToMarkdown } from '../docstring/markdownConverter';
+import { convertDocStringToPlainText } from '../docstring/plaintextConverter';
 import { getToolTipForType } from './tooltipUtils';
 
 export interface Edits {

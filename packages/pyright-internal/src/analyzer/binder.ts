@@ -26,6 +26,7 @@ import { stripFileExtension } from '../common/pathUtils';
 import { convertTextRangeToRange } from '../common/positionUtils';
 import { TextRange, getEmptyRange } from '../common/textRange';
 import { Uri } from '../common/uri/uri';
+import { extractParameterDocString } from '../docstring/markdownConverter';
 import { LocMessage } from '../localization/localize';
 import {
     ArgumentCategory,
@@ -118,7 +119,6 @@ import {
     UnresolvedModuleMarker,
     VariableDeclaration,
 } from './declaration';
-import { extractParameterDocumentation } from './docStringUtils';
 import { ImplicitImport, ImportResult, ImportType } from './importResult';
 import * as ParseTreeUtils from './parseTreeUtils';
 import { ParseTreeWalker } from './parseTreeWalker';
@@ -544,7 +544,7 @@ export class Binder extends ParseTreeWalker {
                             // Extract the parameter docString from the function docString
                             let docString = ParseTreeUtils.getDocString(node?.suite?.statements ?? []);
                             if (docString !== undefined) {
-                                docString = extractParameterDocumentation(docString, paramNode.name.value);
+                                docString = extractParameterDocString(docString, paramNode.name.value);
                             }
 
                             if (symbol) {

@@ -29,7 +29,6 @@ import {
     VariableDeclaration,
 } from '../analyzer/declaration';
 import { isDefinedInFile } from '../analyzer/declarationUtils';
-import { convertDocStringToMarkdown, convertDocStringToPlainText } from '../analyzer/docStringConversion';
 import { ImportedModuleDescriptor, ImportResolver } from '../analyzer/importResolver';
 import { ImportResult } from '../analyzer/importResult';
 import { getParameterListDetails, ParameterSource } from '../analyzer/parameterUtils';
@@ -85,6 +84,8 @@ import { comparePositions, Position, TextRange } from '../common/textRange';
 import { TextRangeCollection } from '../common/textRangeCollection';
 import { Uri } from '../common/uri/uri';
 import { convertToTextEdits } from '../common/workspaceEditUtils';
+import { convertDocStringToMarkdown } from '../docstring/markdownConverter';
+import { convertDocStringToPlainText } from '../docstring/plaintextConverter';
 import { Localizer } from '../localization/localize';
 import {
     ArgumentCategory,

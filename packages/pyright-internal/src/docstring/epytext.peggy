@@ -25,7 +25,7 @@ indented_text
   = indent indent text
 
 text
-  = "\s*" [^\n]*
+  = $[a-z]i+
 
 indent
   = " "*

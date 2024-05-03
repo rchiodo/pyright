@@ -10,6 +10,7 @@
 
 import { appendArray } from '../common/collectionUtils';
 import { DiagnosticRule } from '../common/diagnosticRules';
+import { convertDocStringToPlainText } from '../docstring/plaintextConverter';
 import { LocMessage } from '../localization/localize';
 import {
     ArgumentCategory,
@@ -26,7 +27,6 @@ import {
     validateDataClassTransformDecorator,
 } from './dataClasses';
 import { DeclarationType, FunctionDeclaration } from './declaration';
-import { convertDocStringToPlainText } from './docStringConversion';
 import {
     clonePropertyWithDeleter,
     clonePropertyWithSetter,
