@@ -1822,6 +1822,18 @@ function narrowTypeForInstance(
                         !ClassType.isFinal(concreteVarType) &&
                         !ClassType.isFinal(concreteFilterType)
                     ) {
+                        const varDisjointBase = ClassType.getDisjointBase(concreteVarType);
+                        const filterDisjointBase = ClassType.getDisjointBase(concreteFilterType);
+
+                        // Unrelated disjoint bases cannot share a subclass.
+                        if (
+                            varDisjointBase &&
+                            filterDisjointBase &&
+                            !ClassType.getMostDerivedDisjointBase([varDisjointBase, filterDisjointBase])
+                        ) {
+                            continue;
+                        }
+
                         // The two types appear to have no relation. It's possible that the
                         // two types are protocols or the program is expecting one type to
                         // be a mix-in class used with the other. In this case, we'll

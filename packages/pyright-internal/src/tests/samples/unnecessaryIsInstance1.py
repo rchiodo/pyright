@@ -16,6 +16,7 @@ def func1(p1: int, p2: int | str):
     # This should generate an error because this is always true.
     c = isinstance(p2, (float, dict, int, str))
 
+    # This should generate an error because int and float have disjoint bases.
     d = isinstance(p1, float)
 
     e = isinstance(p2, (float, dict, int))

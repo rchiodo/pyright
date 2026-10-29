@@ -50,6 +50,7 @@ import {
 import {
     ClassType,
     NeverType,
+    OverloadedType,
     Type,
     TypeBase,
     UnknownType,
@@ -57,6 +58,7 @@ import {
     isAnyOrUnknown,
     isClass,
     isClassInstance,
+    isFunction,
     isFunctionOrOverloaded,
     isInstantiableClass,
     isNever,
@@ -1303,73 +1305,58 @@ function validateArithmeticOperation(
                         }
                     }
 
-                    const magicMethodName = binaryOperatorMap[operator][0];
-                    let resultTypeResult = evaluator.getTypeOfMagicMethodCall(
-                        convertFunctionToObject(evaluator, leftSubtypeUnexpanded),
-                        magicMethodName,
-                        [{ type: rightSubtypeUnexpanded, isIncomplete: rightTypeResult.isIncomplete }],
-                        errorNode,
-                        inferenceContext
-                    );
-
-                    if (!resultTypeResult && leftSubtypeUnexpanded !== leftSubtypeExpanded) {
-                        // Try the expanded left type.
-                        resultTypeResult = evaluator.getTypeOfMagicMethodCall(
-                            convertFunctionToObject(evaluator, leftSubtypeExpanded),
-                            magicMethodName,
-                            [{ type: rightSubtypeUnexpanded, isIncomplete: rightTypeResult.isIncomplete }],
-                            errorNode,
-                            inferenceContext
+                    const [magicMethodName, altMagicMethodName] = binaryOperatorMap[operator];
+                    const reflectedFirst =
+                        !operatorSupportsChaining(operator) &&
+                        shouldTryReflectedMethodFirst(
+                            evaluator,
+                            leftSubtypeExpanded,
+                            rightSubtypeExpanded,
+                            altMagicMethodName
                         );
-                    }
+                    let resultTypeResult: TypeResult | undefined;
 
-                    if (!resultTypeResult && rightSubtypeUnexpanded !== rightSubtypeExpanded) {
-                        // Try the expanded left and right type.
-                        resultTypeResult = evaluator.getTypeOfMagicMethodCall(
-                            convertFunctionToObject(evaluator, leftSubtypeExpanded),
-                            magicMethodName,
-                            [{ type: rightSubtypeExpanded, isIncomplete: rightTypeResult.isIncomplete }],
-                            errorNode,
-                            inferenceContext
-                        );
-                    }
+                    for (let methodIndex = 0; methodIndex < 2; methodIndex++) {
+                        const isReflected = methodIndex === 0 ? reflectedFirst : !reflectedFirst;
+                        const methodName = isReflected ? altMagicMethodName : magicMethodName;
+                        const objectType = isReflected ? rightSubtypeUnexpanded : leftSubtypeUnexpanded;
+                        const objectTypeExpanded = isReflected ? rightSubtypeExpanded : leftSubtypeExpanded;
+                        const argType = isReflected ? leftSubtypeUnexpanded : rightSubtypeUnexpanded;
+                        const argTypeExpanded = isReflected ? leftSubtypeExpanded : rightSubtypeExpanded;
+                        const argIsIncomplete = isReflected
+                            ? leftTypeResult.isIncomplete
+                            : rightTypeResult.isIncomplete;
 
-                    if (!resultTypeResult) {
-                        // Try the alternate form (swapping right and left).
-                        const altMagicMethodName = binaryOperatorMap[operator][1];
                         resultTypeResult = evaluator.getTypeOfMagicMethodCall(
-                            convertFunctionToObject(evaluator, rightSubtypeUnexpanded),
-                            altMagicMethodName,
-                            [{ type: leftSubtypeUnexpanded, isIncomplete: leftTypeResult.isIncomplete }],
+                            convertFunctionToObject(evaluator, objectType),
+                            methodName,
+                            [{ type: argType, isIncomplete: argIsIncomplete }],
                             errorNode,
                             inferenceContext
                         );
 
-                        if (!resultTypeResult && rightSubtypeUnexpanded !== rightSubtypeExpanded) {
-                            // Try the expanded right type.
+                        if (!resultTypeResult && objectType !== objectTypeExpanded) {
                             resultTypeResult = evaluator.getTypeOfMagicMethodCall(
-                                convertFunctionToObject(evaluator, rightSubtypeExpanded),
-                                altMagicMethodName,
-                                [
-                                    {
-                                        type: leftSubtypeUnexpanded,
-                                        isIncomplete: leftTypeResult.isIncomplete,
-                                    },
-                                ],
+                                convertFunctionToObject(evaluator, objectTypeExpanded),
+                                methodName,
+                                [{ type: argType, isIncomplete: argIsIncomplete }],
                                 errorNode,
                                 inferenceContext
                             );
                         }
 
-                        if (!resultTypeResult && leftSubtypeUnexpanded !== leftSubtypeExpanded) {
-                            // Try the expanded right and left type.
+                        if (!resultTypeResult && argType !== argTypeExpanded) {
                             resultTypeResult = evaluator.getTypeOfMagicMethodCall(
-                                convertFunctionToObject(evaluator, rightSubtypeExpanded),
-                                altMagicMethodName,
-                                [{ type: leftSubtypeExpanded, isIncomplete: leftTypeResult.isIncomplete }],
+                                convertFunctionToObject(evaluator, objectTypeExpanded),
+                                methodName,
+                                [{ type: argTypeExpanded, isIncomplete: argIsIncomplete }],
                                 errorNode,
                                 inferenceContext
                             );
+                        }
+
+                        if (resultTypeResult) {
+                            break;
                         }
                     }
 
@@ -1405,4 +1392,49 @@ function validateArithmeticOperation(
     );
 
     return { type, magicMethodDeprecationInfo: deprecatedInfo };
+}
+
+function shouldTryReflectedMethodFirst(
+    evaluator: TypeEvaluator,
+    leftType: Type,
+    rightType: Type,
+    methodName: string
+): boolean {
+    if (!isClass(leftType) || !isClass(rightType)) {
+        return false;
+    }
+
+    const leftClass = isInstantiableClass(leftType)
+        ? leftType.shared.effectiveMetaclass
+        : ClassType.cloneAsInstantiable(leftType);
+    const rightClass = isInstantiableClass(rightType)
+        ? rightType.shared.effectiveMetaclass
+        : ClassType.cloneAsInstantiable(rightType);
+
+    if (
+        !leftClass ||
+        !rightClass ||
+        !isClass(leftClass) ||
+        !isClass(rightClass) ||
+        ClassType.isSameGenericClass(leftClass, rightClass) ||
+        !rightClass.shared.mro.some(
+            (baseClass) => isInstantiableClass(baseClass) && ClassType.isSameGenericClass(baseClass, leftClass)
+        )
+    ) {
+        return false;
+    }
+
+    const rightMethod = evaluator.getBoundMagicMethod(rightType, methodName);
+    if (!rightMethod) {
+        return false;
+    }
+
+    const leftMethod = evaluator.getBoundMagicMethod(leftType, methodName);
+    const rightFunction = isFunction(rightMethod) ? rightMethod : OverloadedType.getOverloads(rightMethod)[0];
+    const leftFunction =
+        leftMethod && (isFunction(leftMethod) ? leftMethod : OverloadedType.getOverloads(leftMethod)[0]);
+
+    // Compare declarations rather than signatures so aliases and inherited
+    // methods retain forward-first precedence, even after specialization.
+    return !!rightFunction && (!leftFunction || rightFunction.shared.declaration !== leftFunction.shared.declaration);
 }

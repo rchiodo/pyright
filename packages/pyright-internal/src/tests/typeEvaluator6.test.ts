@@ -1401,3 +1401,8 @@ test('DisjointBase2', () => {
     const analysisResults = TestUtils.typeAnalyzeSampleFiles(['disjointBase2.py']);
     TestUtils.validateResults(analysisResults, 11);
 });
+
+test('DisjointBase3', () => {
+    const analysisResults = TestUtils.typeAnalyzeSampleFiles(['disjointBase3.py']);
+    TestUtils.validateResults(analysisResults, 0);
+});

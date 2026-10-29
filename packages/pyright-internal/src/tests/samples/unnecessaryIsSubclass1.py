@@ -9,6 +9,7 @@ def func1(p1: type[int], p2: type[int] | type[str]):
     # This should generate an error because this is always true.
     c = issubclass(p2, (float, dict, int, str))
 
+    # This should generate an error because int and float have disjoint bases.
     d = issubclass(p1, float)
 
     e = issubclass(p2, (float, dict, int))
